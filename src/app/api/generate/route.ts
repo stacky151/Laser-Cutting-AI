@@ -28,23 +28,28 @@ OPERATING PROTOCOL:
 
 Current Material: Plywood (default)
 Units: Millimeters (standard)`;
+import { NextResponse } from 'next/server';
 
-export async function POST(req: NextRequest) {
+/**
+ * CUTCAD INDUSTRIAL BRAIN CONNECTOR
+ * Version: 4.1 (Ascended Llama 3.1)
+ * Architecture: Serverless GPU Inference (Together AI)
+ */
+
+const TOGETHER_API_KEY = process.env.TOGETHER_API_KEY;
+const MODEL_ID = "savagedzs/cutcad-ai-v4-final";
+
+export async function POST(req: Request) {
   try {
-    const { messages } = await req.json();
-
-    if (!messages || !Array.isArray(messages)) {
-      return NextResponse.json({ error: "Invalid messages format" }, { status: 400 });
-    }
-
-    const hfToken = process.env.HF_TOKEN;
-
-    const response = await fetch(API_URL, {
-      method: "POST",
     const { prompt, parameters } = await req.json();
 
     if (!prompt) {
       return NextResponse.json({ success: false, error: "Missing design parameters." }, { status: 400 });
+    }
+
+    if (!TOGETHER_API_KEY) {
+      console.error("❌ ERROR: TOGETHER_API_KEY is missing from Environment Variables.");
+      return NextResponse.json({ success: false, error: "Backend Configuration Error" }, { status: 500 });
     }
 
     // THE STARK SYSTEM PROMPT: Enforcing fabrication constraints
@@ -56,41 +61,37 @@ export async function POST(req: NextRequest) {
     
     ### Response:`;
 
-    console.log(`🚀 Querying Industrial Brain: ${MODEL_ID}`);
+    console.log(`🚀 Querying Industrial Brain via Together AI...`);
 
     const response = await fetch(
-      `https://api-inference.huggingface.co/models/${MODEL_ID}`,
+      "https://api.together.xyz/v1/chat/completions",
       {
         headers: { 
-          "Authorization": `Bearer ${HF_TOKEN}`,
+          "Authorization": `Bearer ${TOGETHER_API_KEY}`,
           "Content-Type": "application/json",
         },
         method: "POST",
         body: JSON.stringify({
-          inputs: systemPrompt,
-          parameters: {
-            max_new_tokens: 1024,
-            temperature: 0.4, // Lower temperature for higher industrial precision
-            top_p: 0.9,
-            do_sample: true,
-          }
+          model: MODEL_ID,
+          messages: [
+            { role: "user", content: systemPrompt }
+          ],
+          max_tokens: 1024,
+          temperature: 0.4,
+          top_p: 0.7,
+          stop: ["###"]
         }),
       }
     );
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error("❌ HUGGINGFACE ERROR:", errorData);
-      throw new Error(errorData.error || "Inference engine timeout.");
+      console.error("❌ TOGETHER AI ERROR:", errorData);
+      throw new Error(errorData.error?.message || "Inference engine timeout.");
     }
 
     const result = await response.json();
-    
-    // Cleaning the response to remove the prompt prefix if present
-    let finalOutput = result[0]?.generated_text || "Processing complete. Geometry optimized.";
-    if (finalOutput.includes("### Response:")) {
-      finalOutput = finalOutput.split("### Response:").pop().trim();
-    }
+    const finalOutput = result.choices[0]?.message?.content || "Processing complete. Geometry optimized.";
 
     return NextResponse.json({ 
       success: true, 
