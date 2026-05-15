@@ -1,0 +1,39 @@
+{
+  "name": "cutcad-ai",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "generate-dataset": "tsx scripts/generate-dataset.ts",
+    "generate-layer2": "tsx scripts/generate-layer2.ts",
+    "generate-phase2": "tsx scripts/generate-phase2.ts"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "csv-parse": "^6.2.1",
+    "framer-motion": "^12.38.0",
+    "lucide-react": "^1.16.0",
+    "makerjs": "^0.19.2",
+    "next": "16.2.6",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "tailwind-merge": "^3.6.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/cli-progress": "^3.11.6",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "chalk": "^4.1.2",
+    "cli-progress": "^3.12.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.6",
+    "tailwindcss": "^4",
+    "tsx": "^4.22.0",
+    "typescript": "^5"
+  }
+}
