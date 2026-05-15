@@ -69,7 +69,7 @@ function generateEditPairs(batchSize: number): EditPair[] {
   const sampleSize = Math.min(batchSize, records.length);
   const sample = records.slice(0, sampleSize);
 
-  for (const record of sample) {
+  for (const record of sample as any[]) {
     // Parse params from the existing record
     const params = JSON.parse(record.parameters);
 
